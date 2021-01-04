@@ -1,6 +1,7 @@
 import models, functions, sys
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
+from sqlalchemy.sql import select
 from getpass import getpass
 
 engine = create_engine(
@@ -8,7 +9,7 @@ engine = create_engine(
 )
 session = sessionmaker(engine)()
 
-
+print("\n")
 print("login".center(40, "*"))
 username = input("username: ")
 user_obj = functions.search_user(username)
@@ -27,6 +28,7 @@ if len(functions.search_user(username)) == 0:
 
 else:
     password = getpass("Enter password: ")
-    functions.password_checking(password, username)
+    functions.password_checking(username, password)
+    functions.welcome_message(username)
 
 session.close()
