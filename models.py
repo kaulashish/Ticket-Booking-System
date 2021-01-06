@@ -73,14 +73,17 @@ class movies(Base):
     __tablename__ = "movies"
     movieid = Column(Integer, primary_key=True)
     name = Column(Text)
-    price = Column(Integer)
     director = Column(String(30))
 
+    def __repr__(self):
+        return self.name + " directed by " + self.director
 
-class seat(Base):
-    __tablename__ = "seat"
-    x_axis = Column(Integer, primary_key=True)
-    y_axis = Column(Integer, unique=True)
+
+class seats(Base):
+    __tablename__ = "seats"
+    seatid = Column(Integer, primary_key=True)
+    seat_row = Column(Integer)
+    seat_column = Column(Integer)
     status = Column(String(1))
     price = Column(Integer)
 

@@ -25,7 +25,6 @@ if len(functions.search_user(username)) == 0:
     elif prompt.lower() == "n":
         print("\nProgram will end now.")
         sys.exit()
-
 else:
     password = getpass("Enter password: ")
     functions.password_checking(username, password)

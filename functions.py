@@ -1,4 +1,4 @@
-import models, sys, time
+import models, sys, time, math
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import select
 from sqlalchemy import create_engine
@@ -108,7 +108,9 @@ def welcome_message(username):
                 print("1. Init seats")
                 print("2. Show seats")
                 print("3. Add movies")
-                print("4. Show statistics")
+                print("4. Remove movies")
+                print("5. Show movies")
+                print("6. Show statistics")
                 print("0. Logout")
 
                 prompt = int(input("Enter choice: "))
@@ -121,59 +123,130 @@ def welcome_message(username):
 
                 if prompt == 3:
                     add_movies()
+                    print("Movie added successfully!")
                 if prompt == 4:
+                    remove_movies()
+                if prompt == 5:
+                    show_movies()
+                if prompt == 6:
                     statistics()
                 if prompt == 0:
                     print("Program will exit now.")
                     sys.exit()
-                else:
-                    print("")
 
             elif row[0] == username and row[1] == False:
                 print("1. Show seats")
-                print("2. Buy a ticket")
-                print("3. Show booked tickets user info")
+                print("2. Show movies")
+                print("3. Buy a ticket")
+                print("4. Show booked tickets user info")
                 print("0. Logout")
 
                 prompt = int(input("Enter option: "))
                 if prompt == 1:
                     show_seats()
+                    time.sleep(1)
+                    input("\nPress enter to continue")
                 if prompt == 2:
-                    buy_ticket()
+                    show_movies()
                 if prompt == 3:
+                    buy_ticket()
+                if prompt == 4:
                     booked_ticket_info()
                 if prompt == 0:
                     print("Program will exit now.")
                     sys.exit()
-                else:
-                    print("\nInvalid input.")
-                    time.sleep(1)
 
 
 def init_seats():
-    global seat_rows, seat_columns, seats
+    if len(session.query(models.seats).all()) != 0:
+        models.seats.__table__.drop(engine)
     seat_rows = int(input("Enter the number of rows: "))
     seat_columns = int(input("Enter the number of columns: "))
     seats = np.full((seat_rows, seat_columns), "S")
+    # storing seat matrix into database
+    for i in range(len(seats)):
+        for j in range(len(seats[i])):
+            max_seat_id = get_max_id(models.seats, models.seats.seatid)
+            if max_seat_id == None:
+                max_seat_id = 1
+            else:
+                max_seat_id = max_seat_id.seatid + 1
+            seat, status = (i, j), seats[i][j]
+            user_obj = models.seats(
+                seatid=max_seat_id,
+                seat_row=seat[0],
+                seat_column=seat[1],
+                status=status,
+            )
+            session.add(user_obj)
+
     print("Seats Initialized successfully!")
     prompt = str(input("Show seats? (y/n): "))
-    if prompt.lower() == "y":
-        show_seats()
-        time.sleep(1)
-        input("Press enter to continue")
-    elif prompt.lower() == "n":
-        pass
+    while True:
+        if prompt.lower() == "y":
+            show_seats()
+            time.sleep(1)
+            input("Press enter to continue")
+            break
+        elif prompt.lower() == "n":
+            break
+        else:
+            print("invalid entry")
+            prompt = str(input("Show seats? (y/n): "))
+
+    session.commit()
 
 
 def show_seats():
+    seat_rows = len(set(session.query(models.seats.seat_row)))
+    seat_columns = len(set(session.query(models.seats.seat_column)))
+    seats = np.full((seat_rows, seat_columns), "S")
+    result = session.query(
+        models.seats.seat_row, models.seats.seat_column, models.seats.status
+    ).all()
+    for item in result:
+        seats[item[0]][item[1]] = item[2]
     print("\nCinema: ")
-    headers = [x for x in range(1, seat_columns + 1)]
+    headers = [x for x in range(0, seat_columns)]
     table = tabulate(seats, headers, showindex=True, tablefmt="pretty")
     print(table)
 
 
 def add_movies():
-    pass
+    max_movie_id = get_max_id(models.movies, models.movies.movieid)
+    if max_movie_id == None:
+        max_movie_id = 1
+    else:
+        max_movie_id = max_movie_id.movieid + 1
+    print("\n")
+    print("Add movies".center(40, "-"))
+    name = str(input("Enter movie name: "))
+    director = str(input("Enter director name: "))
+    user_obj = models.movies(movieid=max_movie_id, name=name, director=director)
+
+    session.add(user_obj)
+    session.commit()
+
+
+def remove_movies():
+    print("\n")
+    print("Remove movies".center(40, "-"))
+    result = session.query(models.movies).all()
+    for index, movie in enumerate(result):
+        print(f"{index + 1}. {movie}")
+    choice = int(input("Enter choice: "))
+    session.query(models.movies).filter_by(movieid=choice).delete()
+    session.commit()
+    print("Movie deleted successfully!")
+
+
+def show_movies():
+    print("\n")
+    print("Movies".center(40, "*"))
+    result = session.query(models.movies.name, models.movies.director).all()
+    table = tabulate(result, ("Movie", "Director"), showindex=True, tablefmt="pretty")
+    print(table)
+    input("Press Enter to continue.")
 
 
 def statistics():
@@ -188,21 +261,6 @@ def booked_ticket_info():
     pass
 
 
-# x = session.query(models.User).first()
-# result = session.execute(select([models.User.password_hash]))
-# print(result)
-# for row in result:
-#     print(row)
-
-# init_seats()
-# welcome_message("ashishadmin")
-# password_checking("ashishadmin", "testing123")
-
+# add_movies()
+remove_movies()
 session.close()
-
-
-# add_user("testuser2")
-# usr = search_user("ashishadmin")
-# print(session.execute(select([usr.password_hash])))
-# print(usr[0].password_hash)
-# print(password_checking("testing123", "ashish01"))
