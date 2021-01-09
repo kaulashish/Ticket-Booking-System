@@ -370,6 +370,7 @@ def booked_ticket_info(username):
             print(f"Name: {name}")
             print(f"Gender: {gender}")
             print(f"Age: {age}")
+            print(f"Phone: {phone}")
             print("o".center(40, "-"))
     print(f"Tickets price: {moneyspent}")
     print(f"Total tickets bought: {totaltickets}")
