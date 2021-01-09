@@ -16,6 +16,7 @@ from sqlalchemy import (
     VARCHAR,
     Numeric,
     BigInteger,
+    Float,
 )
 
 engine = create_engine(
@@ -31,9 +32,6 @@ class User(Base):
     userid = Column(Integer, primary_key=True)
     username = Column(String(15), unique=True)
     usertype = Column(Boolean)
-    gender = Column(String(1))
-    age = Column(Integer)
-    phone = Column(VARCHAR(15))
     password_hash = Column(VARCHAR(128))
 
     @classmethod
@@ -56,10 +54,13 @@ class User(Base):
 class customer(Base):
     __tablename__ = "customer"
     userid = Column(Integer, primary_key=True)
+    username = Column(String(15))
     name = Column(String(15))
+    gender = Column(String(1))
+    age = Column(Integer)
+    phone = Column(VARCHAR(15))
     tickets_bought = Column(Integer)
-    total = Column(Integer)
-    seat = Column(Numeric(1, 1))
+    totalspent = Column(Integer)
 
 
 class Tickets_price(Base):
@@ -85,7 +86,6 @@ class seats(Base):
     seat_row = Column(Integer)
     seat_column = Column(Integer)
     status = Column(String(1))
-    price = Column(Integer)
 
 
 Base.metadata.create_all(bind=engine)
