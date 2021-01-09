@@ -63,13 +63,6 @@ class customer(Base):
     totalspent = Column(Integer)
 
 
-class Tickets_price(Base):
-    __tablename__ = "ticket_price"
-    userid = Column(Integer, primary_key=True)
-    amount = Column(Integer)
-    price = Column(Integer)
-
-
 class movies(Base):
     __tablename__ = "movies"
     movieid = Column(Integer, primary_key=True)
